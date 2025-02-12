@@ -127,12 +127,9 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             cd foodgram
-            # Выполняет pull образов с Docker Hub
             sudo docker compose -f docker-compose.yml pull
-            # Перезапускает все контейнеры в Docker Compose
             sudo docker compose -f docker-compose.yml down
             sudo docker compose -f docker-compose.yml up -d
-            # Выполняет миграции, импорт даты и сбор статики
             sudo docker compose -f docker-compose.yml exec backend foodgram python manage.py migrate
             sudo docker compose -f docker-compose.yml exec backend foodgram python manage.py import_data
             sudo docker compose -f docker-compose.yml exec backend foodgram python manage.py collectstatic --no-input
