@@ -1,4 +1,4 @@
-ame: Main foodgram workflow
+name: Main foodgram workflow
 
 on:
   push:
