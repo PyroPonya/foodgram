@@ -1,12 +1,10 @@
+# flake8: noqa
 import csv
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
-from food.models import (
-    Ingredient,
-    Tag
-)
+from food.models import Ingredient, Tag
 
 User = get_user_model()
 
