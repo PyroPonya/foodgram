@@ -1,5 +1,6 @@
 # flake8: noqa
 import os
+from datetime import timedelta
 from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 
@@ -28,6 +29,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'djoser',
     'food.apps.FoodConfig',
+    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
@@ -119,17 +121,23 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
 
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        'rest_framework.authentication.TokenAuthentication',
+        'rest_framework.authentication.JWTAuthentication',
     ],
 
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10,
 
 }
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
 CSRF_TRUSTED_ORIGINS = [
     'https://project-letsie.bounceme.net',
     'http://project-letsie.bounceme.net'
