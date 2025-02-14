@@ -130,3 +130,7 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 10,
 
 }
+CSRF_TRUSTED_ORIGINS = [
+    'https://project-letsie.bounceme.net',
+    'http://project-letsie.bounceme.net'
+]
