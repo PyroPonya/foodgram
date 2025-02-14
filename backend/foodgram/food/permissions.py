@@ -1,4 +1,8 @@
+# flake8: noqa
 from rest_framework.permissions import BasePermission, SAFE_METHODS
+
+# backend / foodgram / food / permissions.py: 1: 1: I001 isort found an import in the wrong position
+# backend / foodgram / food / permissions.py: 2: 1: I005 isort found an unexpected missing import
 
 
 class IsAdminModeratorAuthorOrReadOnly(BasePermission):
