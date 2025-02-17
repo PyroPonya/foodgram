@@ -7,14 +7,9 @@ User = get_user_model()
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name',)
+    list_display = ('username', 'email', 'first_name', 'last_name', 'avatar')
     search_fields = ('username', 'email')
     empty_value_display = '-пусто-'
-
-
-UserAdmin.fieldsets += (
-    ('Extra Fields', {'fields': ('avatar',)}),
-)
 
 
 class RecipeAdmin(admin.ModelAdmin):
@@ -36,6 +31,7 @@ class IngredientAdmin(admin.ModelAdmin):
     empty_value_display = '-пусто-'
 
 
+admin.site.register(User, UserAdmin)
 admin.site.register(Recipe, RecipeAdmin)
 admin.site.register(Tag, TagAdmin)
 admin.site.register(Ingredient, IngredientAdmin)
