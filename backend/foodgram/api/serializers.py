@@ -47,11 +47,13 @@ class UserSerializer(DjoserUserSerializer):
     avatar = serializers.SerializerMethodField('get_avatar')
 
     class Meta(DjoserUserSerializer.Meta):
+        model = User
         fields = (
             *DjoserUserSerializer.Meta.fields,
             'avatar',
             'is_subscribed',
         )
+        extra_kwargs = {'password': {'write_only': True}}
 
     def get_is_subscribed(self, author):
         user = self.context.get('request').user
@@ -66,6 +68,22 @@ class UserSerializer(DjoserUserSerializer):
         if obj.avatar_raw:
             return obj.avatar_raw.url
         return None
+
+    def create(self, validated_data):
+        user = User(
+            email=validated_data['email'],
+            username=validated_data['username'],
+            first_name=validated_data['first_name'],
+            last_name=validated_data['last_name']
+        )
+        user.set_password(validated_data['password'])
+        try:
+            user.save()
+        except IntegrityError:
+            raise serializers.ValidationError(
+                'Пользователь с таким email уже существует'
+            )
+        return user
 
 
 class SubscribeSerializer(serializers.ModelSerializer):
