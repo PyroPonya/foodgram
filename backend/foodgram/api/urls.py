@@ -12,14 +12,11 @@ from api.views import (
 app_name = 'api'
 
 router = DefaultRouter()
-# router.register(
-#     r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
-#     CommentViewSet, basename='comments')
 
-router.reqister('tags', TagViewSet, basename='tags')
+router.register('tags', TagViewSet, basename='tags')
 router.register('ingredients', IngredientViewSet, basename='ingredients')
-router.register('recipes')
 router.register('users', UserViewSet, basename='users')
+router.register('recipes', RecipeViewSet, basename='recipes')
 
 urlpatterns = [
     path('', include(router.urls)),

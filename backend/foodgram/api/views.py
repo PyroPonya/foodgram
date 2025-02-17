@@ -316,17 +316,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         favorite.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class ShoppingListViewSet(viewsets.ModelViewSet):
-    """Список покупок."""
-
-    queryset = ShoppingList.objects.all()
-    serializer_class = ShoppingListSerializer
-
-    def get_queryset(self):
-        user = self.request.user
-        return ShoppingList.objects.filter(user=user)
-
     @action(
         methods=['get'],
         detail=False,
@@ -334,20 +323,14 @@ class ShoppingListViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def download_shopping_cart(self, request):
-        """Скачать список покупок."""
-        user = self.request.user
-        shopping_list = ShoppingList.objects.filter(user=user)
-        recipes = Recipe.objects.filter(shopping_cart__in=shopping_list)
-        ingredients = recipes.values_list(
-            'ingredients__name', 'ingredients__measurement_unit'
-        ).annotate(amount=Sum('recipe_ingredients__amount')).order_by(
-            'recipe_ingredients__ingredient__name'
-        )
-        text = '\n'.join([
-            f'{name} - {amount} {unit}'
-            for name, unit, amount in ingredients
-        ])
-        response = HttpResponse(text, content_type='text/plain')
+        """Скачать список покупок. Доступно только авторизованным пользователям."""
+        # Fetching shopping list for the authenticated user
+        shopping_list = ShoppingList.objects.filter(user=request.user)
+
+        # Example: Creating a text file with shopping list items
+        content = "\n".join(
+            [f"{item.recipe.name}: {item.amount}" for item in shopping_list])
+        response = HttpResponse(content, content_type='text/plain')
         response['Content-Disposition'] = 'attachment; filename="shopping_list.txt"'
         return response
 
@@ -358,21 +341,19 @@ class ShoppingListViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def add_to_shopping_cart(self, request, id):
-        """Добавить рецепт в список покупок."""
+        """Добавить рецепт в список покупок. Доступно только авторизованным пользователям."""
         recipe = get_object_or_404(Recipe, id=id)
-        shopping_list, created = ShoppingList.objects.get_or_create(
-            user=request.user)
-        if created or not shopping_list.recipes.filter(id=id).exists():
-            shopping_list.recipes.add(recipe)
+        shopping_item, created = ShoppingList.objects.get_or_create(
+            user=request.user, recipe=recipe)
+
+        if not created:
             return Response(
-                status=status.HTTP_201_CREATED,
-                data=RecipeSerializerRead(
-                    recipe, context={'request': request}).data
+                {'errors': 'Рецепт уже есть в списке покупок'},
+                status=status.HTTP_400_BAD_REQUEST
             )
-        return Response(
-            status=status.HTTP_400_BAD_REQUEST,
-            data={'errors': 'Рецепт уже есть в списке покупок'}
-        )
+
+        serializer = RecipeSerializerRead(recipe, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     @action(
         methods=['delete'],
@@ -381,16 +362,16 @@ class ShoppingListViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated]
     )
     def remove_from_shopping_cart(self, request, id):
-        """Удалить рецепт из списка покупок."""
+        """Удалить рецепт из списка покупок. Доступно только авторизованным пользователям."""
         recipe = get_object_or_404(Recipe, id=id)
-        shopping_list = ShoppingList.objects.filter(
-            user=request.user, recipes__id=id).first()
+        shopping_item = ShoppingList.objects.filter(
+            user=request.user, recipe=recipe)
 
-        if not shopping_list:
+        if not shopping_item.exists():
             return Response(
-                status=status.HTTP_400_BAD_REQUEST,
-                data={'errors': 'Рецепт не найден в списке покупок'}
+                {'errors': 'Рецепта нет в списке покупок'},
+                status=status.HTTP_400_BAD_REQUEST
             )
 
-        shopping_list.recipes.remove(recipe)
+        shopping_item.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
