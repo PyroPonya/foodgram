@@ -5,7 +5,7 @@ import datetime as dt
 from django.contrib.auth import get_user_model
 from django.db.utils import IntegrityError
 from django.core.files.base import ContentFile
-from djoser.serializers import DjoserUserSerializer
+from djoser.serializers import UserSerializer as DjoserUserSerializer
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
