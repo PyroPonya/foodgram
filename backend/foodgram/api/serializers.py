@@ -78,33 +78,6 @@ class SubscribeSerializer(serializers.ModelSerializer):
         return UserSerializer(instance, context=context).data
 
 
-class SubscriptionSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Subscription
-        fields = ('id', 'user', 'author')
-
-
-# class RecipeSerializer(serializers.ModelSerializer):
-#     image = Base64ImageField(required=False, allow_null=True)
-
-#     class Meta:
-#         model = Recipe
-#         fields = ('id', 'name', 'image', 'cooking_time')
-
-#     def to_representation(self, instance):
-#         context = {'request': self.context['request']}
-#         return RecipeSerializer(instance, context=context).data
-
-#     def create(self, validated_data):
-#         author = self.context['request'].user
-#         tags = validated_data.pop('tags')
-#         ingredients = validated_data.pop('ingredients')
-#         recipe = Recipe.objects.create(author=author, **validated_data)
-#         recipe.tags.set(tags)
-#         recipe.ingredients.set(ingredients)
-#         return recipe
-
-
 class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
@@ -160,9 +133,3 @@ class RecipeSerializerWrite(serializers.ModelSerializer):
         recipe.tags.set(tags)
         recipe.ingredients.set(ingredients)
         return recipe
-
-
-class ShoppingListSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = ShoppingList
-        fields = ('id', 'recipe', 'user')

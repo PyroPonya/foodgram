@@ -33,7 +33,6 @@ from api.serializers import (
     IngredientSerializer,
     RecipeSerializerWrite,
     RecipeSerializerRead,
-    ShoppingListSerializer
 )
 from api.permissions import (
     IsAdmin,
@@ -92,13 +91,13 @@ class UserViewSet(DjoserUserViewSet):
     @action(
         ['POST', 'DELETE'],
         detail=True,
-        url_path='(?P<id>[0-9]+)/subscribe/',
+        url_path=r'(?P<author_id>[0-9]+)/subscribe/',
         permission_classes=[IsAuthenticated]
     )
-    def subscribe(self, request, id):
+    def subscribe(self, request, author_id):
         """Подписка/отписка."""
         user = request.user
-        author = get_object_or_404(User, pk=id)
+        author = get_object_or_404(User, pk=author_id)
         serializer = SubscribeSerializer(
             author, context={'request': request}
         )
