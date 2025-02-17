@@ -38,24 +38,6 @@ class ImageSerializer(serializers.ModelSerializer):
         fields = ('avatar',)
 
 
-class UserCreateSerializer(DjoserUserSerializer):
-    class Meta(DjoserUserSerializer.Meta):
-        fields = (
-            'email',
-            'username',
-            'first_name',
-            'last_name',
-            'password'
-        )
-        required_fields = (
-            'email',
-            'username',
-            'first_name',
-            'last_name',
-            'password'
-        )
-
-
 class UserSerializer(DjoserUserSerializer):
     is_subscribed = serializers.SerializerMethodField(
         'get_is_subscribed',
