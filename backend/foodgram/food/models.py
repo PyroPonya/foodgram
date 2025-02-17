@@ -158,3 +158,18 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         return f'{self.recipe} {self.ingredient} {self.amount}'
+
+
+class ShoppingList(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='пользователь',
+        related_name='shopping_list',
+    )
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='рецепт',
+        related_name='shopping_list',
+    )

@@ -9,7 +9,13 @@ from djoser.serializers import UserSerializer as DjoserUserSerializer
 from rest_framework import serializers
 from rest_framework.generics import get_object_or_404
 
-from food.models import Subscription, Ingredient, Tag, Recipe
+from food.models import (
+    Subscription,
+    Ingredient,
+    Tag,
+    Recipe,
+    ShoppingList
+)
 
 User = get_user_model()
 
@@ -108,7 +114,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
-        fields = ('name', 'slug')
+        fields = ('id', 'name', 'slug')
 
 
 class RecipeSerializerRead(serializers.ModelSerializer):
@@ -138,3 +144,25 @@ class RecipeSerializerWrite(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('__all__')
+
+    def create(self, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        recipe = Recipe.objects.create(**validated_data)
+        recipe.tags.set(tags)
+        recipe.ingredients.set(ingredients)
+        return recipe
+
+    def update(self, instance, validated_data):
+        tags = validated_data.pop('tags')
+        ingredients = validated_data.pop('ingredients')
+        recipe = super().update(instance, validated_data)
+        recipe.tags.set(tags)
+        recipe.ingredients.set(ingredients)
+        return recipe
+
+
+class ShoppingListSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ShoppingList
+        fields = ('id', 'recipe', 'user')
