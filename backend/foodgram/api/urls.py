@@ -22,5 +22,6 @@ urlpatterns = [
     path('', include(router.urls)),
     path('auth/', include('djoser.urls.authtoken'))
 ]
+
 # /api/ > auth/ > token/login/
 # from djoser.views import UserViewSet
