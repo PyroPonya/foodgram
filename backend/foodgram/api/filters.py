@@ -1,19 +1,35 @@
 # flake8: noqa
-from django_filters.rest_framework import CharFilter, FilterSet
+from django_filters.rest_framework import filters, FilterSet
 
-from food.models import Recipe
+from food.models import Tag, Ingredient, Recipe
+
+
+class IngredientFilter(FilterSet):
+    name = filters.CharFilter(lookup_expr='istartswith')
+
+    class Meta:
+        model = Ingredient
+        fields = ('name',)
 
 
 class RecipeFilter(FilterSet):
-    """Фильтр для модели Recipe."""
-
-    author = CharFilter(field_name='author', lookup_expr='exact')
-    name = CharFilter(field_name='name', lookup_expr='icontains')
-    ingredients = CharFilter(
-        field_name='ingredients__name', lookup_expr='icontains')
-    tags = CharFilter(field_name='tags__slug', lookup_expr='exact')
-    cooking_time = CharFilter(field_name='cooking_time', lookup_expr='exact')
+    tags = filters.ModelMultipleChoiceFilter(
+        queryset=Tag.objects.all(), field_name='tags__slug',
+        to_field_name='slug'
+    )
+    is_favorited = filters.BooleanFilter(method='filter_favorites')
+    is_in_shopping_cart = filters.BooleanFilter(method='filter_shoppingcarts')
 
     class Meta:
         model = Recipe
-        fields = ('author', 'name', 'ingredients', 'tags', 'cooking_time')
+        fields = ('author', 'tags', 'is_favorited', 'is_in_shopping_cart')
+
+    def filter_favorites(self, recipes, name, value):
+        if self.request.user.is_authenticated and value:
+            return recipes.filter(favorites__user=self.request.user)
+        return recipes
+
+    def filter_shoppingcarts(self, recipes, name, value):
+        if self.request.user.is_authenticated and value:
+            return recipes.filter(shoppingcarts__user=self.request.user)
+        return recipes

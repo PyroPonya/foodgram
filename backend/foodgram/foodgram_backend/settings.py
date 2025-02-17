@@ -1,6 +1,5 @@
 # flake8: noqa
 import os
-from datetime import timedelta
 from pathlib import Path
 from django.core.management.utils import get_random_secret_key
 
@@ -25,12 +24,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'rest_framework',
     'rest_framework.authtoken',
-    'django_filters',
+    'rest_framework',
     'djoser',
-    'food.apps.FoodConfig',
+    'django_filters',
+    'drf_extra_fields',
     'api.apps.ApiConfig',
+    'food.apps.FoodConfig',
 ]
 
 MIDDLEWARE = [
@@ -101,7 +101,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ru-RU'
 
 TIME_ZONE = 'UTC'
 
@@ -123,30 +123,26 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'food.User'
 
 DJOSER = {
+    'PERMISSIONS': {
+        'user': ['rest_framework.permissions.AllowAny'],
+        'user_list': ['rest_framework.permissions.AllowAny'],
+    },
     'SERIALIZERS': {
         'user': 'api.serializers.UserSerializer',
         'current_user': 'api.serializers.UserSerializer',
-    },
+        'user_create': 'djoser.serializers.UserCreateSerializer',
+        'token_create': 'djoser.serializers.TokenCreateSerializer',
+    }
 }
 
 REST_FRAMEWORK = {
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.AllowAny',
-    ],
-
     'DEFAULT_AUTHENTICATION_CLASSES': [
-        "rest_framework.authentication.TokenAuthentication",
+        'rest_framework.authentication.TokenAuthentication',
     ],
-
-    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'DEFAULT_PAGINATION_CLASS': 'api.paginations.PageSizeLimitPagination',
     'PAGE_SIZE': 10,
-
 }
 
-# SIMPLE_JWT = {
-#     'ACCESS_TOKEN_LIFETIME': timedelta(days=7),
-#     'AUTH_HEADER_TYPES': ('Bearer',),
-# }
 
 CSRF_TRUSTED_ORIGINS = [
     'https://project-letsie.bounceme.net',

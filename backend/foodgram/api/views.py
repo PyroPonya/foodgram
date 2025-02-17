@@ -22,9 +22,8 @@ from rest_framework.views import APIView
 
 
 from api.filters import RecipeFilter
-from api.pagination import (
+from api.paginations import (
     CustomPageNumberPagination,
-    CustomUserlistPageNumberPagination
 )
 from api.serializers import (
     SubscribeSerializer,
