@@ -7,9 +7,14 @@ User = get_user_model()
 
 
 class UserAdmin(admin.ModelAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name')
+    list_display = ('username', 'email', 'first_name', 'last_name',)
     search_fields = ('username', 'email')
     empty_value_display = '-пусто-'
+
+
+UserAdmin.fieldsets += (
+    ('Extra Fields', {'fields': ('avatar',)}),
+)
 
 
 class RecipeAdmin(admin.ModelAdmin):

@@ -31,3 +31,10 @@ class IsAdminOrReadOnly(BasePermission):
             request.method in SAFE_METHODS
             or (request.user.is_authenticated and request.user.is_admin)
         )
+
+
+class IsAuthorOrReadOnly(BasePermission):
+    """AuthorPermission."""
+
+    def has_object_permission(self, request, view, obj):
+        return request.method in SAFE_METHODS or obj.author == request.user

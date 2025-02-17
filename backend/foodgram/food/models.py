@@ -1,7 +1,47 @@
-from django.contrib.auth import get_user_model
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 
-User = get_user_model()
+
+class User(AbstractUser):
+    """Custom user model."""
+    avatar = models.ImageField(
+        verbose_name='аватар',
+        upload_to='food/avatars/',
+        blank=True,
+    )
+
+    class Meta:
+        verbose_name = 'Пользователь'
+        verbose_name_plural = 'Пользователи'
+        ordering = ('username',)
+
+
+class Subscription(models.Model):
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='follower',
+        verbose_name='подписчик',
+    )
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='following',
+        verbose_name='автор',
+    )
+
+    class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_subscription',
+            )
+        ]
+
+    def __str__(self):
+        return f'{self.user} подписан на {self.author}'
 
 
 class Ingredient(models.Model):
@@ -59,14 +99,14 @@ class Recipe(models.Model):
     )
     ingredients = models.ManyToManyField(
         Ingredient,
-        # through='IngredientAmount',
+        through='RecipeIngredient',
         verbose_name='ингредиенты',
         related_name='recipes',
     )
     tags = models.ManyToManyField(
         Tag,
+        through='RecipeTag',
         verbose_name='теги',
-        related_name='recipes',
     )
     cooking_time = models.PositiveSmallIntegerField(
         verbose_name='время приготовления',
@@ -79,3 +119,42 @@ class Recipe(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class RecipeTag(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='рецепт',
+        related_name='recipe_tags',
+    )
+    tag = models.ForeignKey(
+        Tag,
+        on_delete=models.CASCADE,
+        verbose_name='тег',
+        related_name='recipe_tags',
+    )
+
+    def __str__(self):
+        return f'{self.recipe} {self.tag}'
+
+
+class RecipeIngredient(models.Model):
+    recipe = models.ForeignKey(
+        Recipe,
+        on_delete=models.CASCADE,
+        verbose_name='рецепт',
+        related_name='recipe_ingredients',
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        on_delete=models.CASCADE,
+        verbose_name='ингредиент',
+        related_name='recipe_ingredients',
+    )
+    amount = models.PositiveSmallIntegerField(
+        verbose_name='количество',
+    )
+
+    def __str__(self):
+        return f'{self.recipe} {self.ingredient} {self.amount}'
