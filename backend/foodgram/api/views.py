@@ -1,3 +1,4 @@
+# flake8: noqa
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend

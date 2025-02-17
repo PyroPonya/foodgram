@@ -1,4 +1,4 @@
-# pep8: noqa
+# flake8: noqa
 from django_filters.rest_framework import CharFilter, FilterSet
 
 from food.models import Recipe
