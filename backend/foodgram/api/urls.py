@@ -9,9 +9,9 @@ from api.views import (
 app_name = 'api'
 
 router = DefaultRouter()
-router.register(
-    r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
-    CommentViewSet, basename='comments')
+# router.register(
+#     r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
+#     CommentViewSet, basename='comments')
 
 
 router.register('users', UserViewSet, basename='users')
