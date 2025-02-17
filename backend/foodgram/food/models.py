@@ -11,7 +11,6 @@ class User(AbstractUser):
     )
 
     class Meta:
-        required_fields = ('username', 'email', 'first_name', 'last_name')
         verbose_name = 'Пользователь'
         verbose_name_plural = 'Пользователи'
         ordering = ('username',)
