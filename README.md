@@ -3,3 +3,4 @@
 По адресу http://localhost изучите фронтенд веб-приложения, а по адресу http://localhost/api/docs/ — спецификацию API.
 
 демо: https://project-letsie.bounceme.net
+создание админа: python manage.py init_admin (food.management.commands.init_admin.Command)
