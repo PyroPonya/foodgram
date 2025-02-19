@@ -5,7 +5,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group
 from django.utils.html import mark_safe
 
-from .models import (
+from food.models import (
     AmountIngredient,
     Favorite,
     Ingredient,

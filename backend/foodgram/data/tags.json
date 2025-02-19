@@ -1,0 +1,19 @@
+[
+  { "name": "завтрак", "slug": "breakfast" },
+  { "name": "обед", "slug": "lunch" },
+  { "name": "ужин", "slug": "dinner" },
+  { "name": "закуска", "slug": "snack" },
+  { "name": "веган", "slug": "vegan" },
+  { "name": "вегетарианское", "slug": "vegetarian" },
+  { "name": "традиционное", "slug": "traditional" },
+  { "name": "жирное", "slug": "fat" },
+  { "name": "острое", "slug": "spicy" },
+  { "name": "молочное", "slug": "milk" },
+  { "name": "мясное", "slug": "meat" },
+  { "name": "соус", "slug": "sauce" },
+  { "name": "мясо", "slug": "meat" },
+  { "name": "рыба", "slug": "fish" },
+  { "name": "овощи", "slug": "vegetables" },
+  { "name": "фрукты", "slug": "fruits" },
+  { "name": "салат", "slug": "salad" }
+]
