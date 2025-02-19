@@ -1,7 +1,7 @@
 # flake8: noqa
 from django.core.management.base import BaseCommand
 
-from recipes.models import Tag
+from food.models import Tag
 from .import_data import import_data_from_json
 
 
