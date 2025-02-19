@@ -2,6 +2,7 @@ from datetime import datetime
 
 
 def get_shopping_cart(shopping_cart):
+    """Возвращает текстовое представление списка покупок."""
     return '\n'.join([
         'Время и дата составления списка:',
         '{:%H:%M %d.%m.%Y}'.format(datetime.now()),
