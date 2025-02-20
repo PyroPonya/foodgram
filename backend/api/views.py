@@ -23,7 +23,7 @@ from .serializers import (
     RecipeSerializer,
     SubscribeSerializer,
     SummaryRecipeSerializer,
-    TagSerializer
+    TagSerializer,
 )
 from .utils import get_shopping_cart
 

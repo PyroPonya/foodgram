@@ -11,7 +11,7 @@ from .constants import (
     MAX_SLUG_LENGTH,
     MAX_USERNAME_LENGTH,
     MIN_AMOUNT,
-    MIN_COOKING_TIME
+    MIN_COOKING_TIME,
 )
 
 
