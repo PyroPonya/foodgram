@@ -16,7 +16,7 @@ jobs:
           POSTGRES_PASSWORD: foodgram_password
           POSTGRES_DB: foodgram
         ports:
-          - 6543:6543
+          - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: actions/checkout@v3
@@ -29,17 +29,17 @@ jobs:
         run: |
           python -m pip install --upgrade pip 
           pip install flake8==6.0.0 flake8-isort==6.0.0
-          pip install -r ./backend/requirements.txt
+          pip install -r ./backend/foodgram/requirements.txt
       - name: Test with flake8 and django tests
         env:
           POSTGRES_USER: foodgram_user
           POSTGRES_PASSWORD: foodgram_password
           POSTGRES_DB: foodgram
           DB_HOST: 127.0.0.1
-          DB_PORT: 6543
+          DB_PORT: 5432
         run: |
           python -m flake8 backend/
-          cd backend/
+          cd backend/foodgram/
           python manage.py test
   build_and_push_to_docker_hub:
     name: Push Docker image to DockerHub
@@ -117,7 +117,7 @@ jobs:
           key: ${{ secrets.SSH_KEY }}
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           source: 'docker-compose.yml'
-          target: 'kittygram'
+          target: 'foodgram'
       - name: Executing remote ssh commands to deploy
         uses: appleboy/ssh-action@master
         with:
@@ -127,15 +127,15 @@ jobs:
           passphrase: ${{ secrets.SSH_PASSPHRASE }}
           script: |
             cd foodgram
-            # Выполняет pull образов с Docker Hub
             sudo docker compose -f docker-compose.yml pull
-            # Перезапускает все контейнеры в Docker Compose
             sudo docker compose -f docker-compose.yml down
             sudo docker compose -f docker-compose.yml up -d
-            # Выполняет миграции, импорт даты и сбор статики
-            sudo docker compose -f docker-compose.yml exec backend foodgram python manage.py migrate
-            sudo docker compose -f docker-compose.yml exec backend foodgram python manage.py import_data
-            sudo docker compose -f docker-compose.yml exec backend foodgram python manage.py collectstatic --no-input
+            sudo docker compose -f docker-compose.yml exec backend python manage.py makemigrations
+            sudo docker compose -f docker-compose.yml exec backend python manage.py migrate
+            sudo docker compose -f docker-compose.yml exec backend python manage.py import_ingredients
+            sudo docker compose -f docker-compose.yml exec backend python manage.py import_tags
+            sudo docker compose -f docker-compose.yml exec backend python manage.py init_admin
+            sudo docker compose -f docker-compose.yml exec backend python manage.py collectstatic --no-input
   send_message:
     runs-on: ubuntu-latest
     needs: deploy

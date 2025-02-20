@@ -1,4 +1,3 @@
-from django.http import HttpResponseNotFound
 from django.shortcuts import redirect
 from django.views import View
 
@@ -11,5 +10,5 @@ class RecipeRedirectView(View):
     def get(self, request, pk=None):
         """Перенаправление на страницу рецепта."""
         if not Recipe.objects.filter(pk=pk).exists():
-            return HttpResponseNotFound(f'Рецепт с id={pk} не существует.')
+            return redirect('/404/')
         return redirect(f'/recipes/{pk}/')

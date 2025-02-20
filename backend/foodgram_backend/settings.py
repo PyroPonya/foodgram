@@ -8,8 +8,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 
-# DEBUG = os.getenv('DEBUG', 'True') == 'True'
-DEBUG = 'True'
+DEBUG = os.getenv('DEBUG', 'True') == 'True'
+# DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1',
                  os.getenv('HOST_IP', ''), os.getenv('HOST_URL', '')]
@@ -65,7 +65,6 @@ WSGI_APPLICATION = 'foodgram_backend.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
 DATABASES = {
     'default': {
@@ -77,6 +76,14 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', 5432)
     }
 }
+
+# db for postman
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
