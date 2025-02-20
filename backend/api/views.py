@@ -6,12 +6,11 @@ from django.urls import reverse
 from django_filters.rest_framework import DjangoFilterBackend
 from djoser.views import UserViewSet as DjoserUserViewSet
 from rest_framework import status, viewsets, serializers
-
 from rest_framework.decorators import action
 from rest_framework.permissions import (
     AllowAny,
     IsAuthenticated,
-    IsAuthenticatedOrReadOnly
+    IsAuthenticatedOrReadOnly,
 )
 from rest_framework.response import Response
 
@@ -24,10 +23,16 @@ from .serializers import (
     RecipeSerializer,
     SubscribeSerializer,
     SummaryRecipeSerializer,
-    TagSerializer,
+    TagSerializer
 )
 from .utils import get_shopping_cart
-from food.models import Ingredient, Recipe, Subscription, Tag
+
+from food.models import (
+    Ingredient,
+    Recipe,
+    Subscription,
+    Tag,
+)
 
 
 User = get_user_model()

@@ -5,16 +5,7 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from food.constants import MIN_AMOUNT, MIN_COOKING_TIME
-from food.models import (
-    AmountIngredient,
-    Favorite,
-    Ingredient,
-    Recipe,
-    ShoppingCart,
-    Subscription,
-    Tag
-)
-
+from food.models import AmountIngredient, Ingredient, Recipe, Subscription, Tag
 
 User = get_user_model()
 
