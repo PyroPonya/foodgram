@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Exists, F, Sum, Subquery
+from django.db.models import Exists, F, Sum
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -291,19 +291,3 @@ class RecipeViewSet(viewsets.ModelViewSet):
             pk,
             'favorites'
         )
-
-    @action(
-        ['PATCH', 'PUT'],
-        detail=True,
-        permission_classes=[IsAuthenticated]
-    )
-    def patch(self, request, pk=None):
-        """Редактирование рецепта."""
-        recipe = get_object_or_404(Recipe, pk=pk)
-        serializer = RecipeCreateUpdateSerializer(
-            recipe, data=request.data, partial=True
-        )
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
