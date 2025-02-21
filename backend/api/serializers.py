@@ -5,7 +5,15 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
 from food.constants import MIN_AMOUNT, MIN_COOKING_TIME
-from food.models import AmountIngredient, Ingredient, Recipe, Subscription, Tag
+from food.models import (
+    AmountIngredient,
+    Favorite,
+    Ingredient,
+    Recipe,
+    ShoppingCart,
+    Subscription,
+    Tag
+)
 
 User = get_user_model()
 
@@ -36,6 +44,7 @@ class UserSerializer(DjoserUserSerializer):
             'avatar',
             'is_subscribed'
         )
+        extra_kwargs = {'password': {'write_only': True}}
 
     def get_is_subscribed(self, author):
         """Проверка подписки."""
@@ -129,38 +138,49 @@ class RecipeSerializer(serializers.ModelSerializer):
         source='amounts'
     )
     author = UserSerializer()
-    # is_favorited = serializers.SerializerMethodField()
-    # is_in_shopping_cart = serializers.SerializerMethodField()
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         """Мета класс."""
 
         model = Recipe
-        fields = '__all__'
+        fields = (
+            'id',
+            'tags',
+            'author',
+            'ingredients',
+            'is_favorited',
+            'is_in_shopping_cart',
+            'name',
+            'image',
+            'text',
+            'cooking_time'
+        )
 
-    # def get_is_favorited(self, recipe):
-    #     """Проверка избранного рецепта."""
-    #     request = self.context.get('request')
-    #     return (
-    #         request is not None
-    #         and request.user.is_authenticated
-    #         and Favorite.objects.filter(
-    #             user=request.user,
-    #             recipe=recipe
-    #         ).exists()
-    #     )
+    def get_is_favorited(self, recipe):
+        """Проверка избранного рецепта."""
+        request = self.context.get('request')
+        return (
+            request is not None
+            and request.user.is_authenticated
+            and Favorite.objects.filter(
+                user=request.user,
+                recipe=recipe
+            ).exists()
+        )
 
-    # def get_is_in_shopping_cart(self, recipe):
-    #     """Проверка в корзине рецепта."""
-    #     request = self.context.get('request')
-    #     return (
-    #         request is not None
-    #         and request.user.is_authenticated
-    #         and ShoppingCart.objects.filter(
-    #             user=request.user,
-    #             recipe=recipe
-    #         ).exists()
-    #     )
+    def get_is_in_shopping_cart(self, recipe):
+        """Проверка в корзине рецепта."""
+        request = self.context.get('request')
+        return (
+            request is not None
+            and request.user.is_authenticated
+            and ShoppingCart.objects.filter(
+                user=request.user,
+                recipe=recipe
+            ).exists()
+        )
 
 
 class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
@@ -186,7 +206,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
             'ingredients',
             'name',
             'tags',
-            'text'
+            'text',
         )
         read_only_fields = ('author',)
 
@@ -247,7 +267,7 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         """Обновление рецепта."""
         tags_data = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
-        instance.amounts.all().clear()
+        instance.amounts.clear()
         self.create_amount_ingredients(instance, ingredients_data)
         instance.tags.set(tags_data)
         return super().update(instance, validated_data)

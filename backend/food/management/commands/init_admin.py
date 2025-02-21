@@ -10,7 +10,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         username = os.getenv('ADMIN_USERNAME', 'admin')
-        email = os.getenv('ADMIN_email', 'admin@email.test')
+        email = os.getenv('ADMIN_EMAIL', 'admin@email.test')
         password = os.getenv('ADMIN_PASSWORD', 'admin')
 
         if not User.objects.filter(username=username).exists():

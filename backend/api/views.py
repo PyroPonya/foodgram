@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Exists, F, Sum
+from django.db.models import Exists, F, Sum, Subquery
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -85,11 +85,24 @@ class UserViewSet(DjoserUserViewSet):
         """Подписка."""
         user = request.user
         author = get_object_or_404(User, pk=id)
+        if user == author:
+            return Response(
+                {'errors': 'Нельзя подписаться на самого себя'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
         serializer = SubscribeSerializer(
             author,
             context={'request': request}
         )
         if request.method == 'DELETE':
+            if not Subscription.objects.filter(
+                user=user,
+                author=author
+            ).exists():
+                return Response(
+                    {'errors': 'Вы не подписаны на этого автора'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             get_object_or_404(Subscription, user=user, author=author).delete()
             return Response(
                 serializer.data,
@@ -167,7 +180,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             )
         )
     )
-    # queryset = Recipe.objects.all()
     http_method_names = ('get', 'post', 'patch', 'delete')
     permission_classes = (
         IsAuthorOrReadOnly,
@@ -194,10 +206,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(
             {
                 'short-link': request.build_absolute_uri(
-                    reverse('short-link', args=(pk,))
+                    reverse('food:short-link', args=(pk,))
                 )
             }
         )
+
+    def perform_create(self, serializer):
+        """Создание рецепта."""
+        serializer.save(author=self.request.user)
 
     @action(
         ['GET'],
@@ -232,6 +248,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
         collection = getattr(user, collection_name)
         if request.method == 'DELETE':
+            if not collection.filter(recipe=recipe).exists():
+                return Response(
+                    status=status.HTTP_400_BAD_REQUEST,
+                    data={
+                        'errors': 'Вы не добавили этот рецепт в коллекцию'
+                    }
+                )
             get_object_or_404(collection, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         if collection.get_or_create(recipe=recipe)[1]:
@@ -268,3 +291,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
             pk,
             'favorites'
         )
+
+    @action(
+        ['PATCH', 'PUT'],
+        detail=True,
+        permission_classes=[IsAuthenticated]
+    )
+    def patch(self, request, pk=None):
+        """Редактирование рецепта."""
+        recipe = get_object_or_404(Recipe, pk=pk)
+        serializer = RecipeCreateUpdateSerializer(
+            recipe, data=request.data, partial=True
+        )
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

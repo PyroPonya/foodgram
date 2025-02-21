@@ -14,22 +14,29 @@ class Command(BaseCommand):
     help = 'Импортирует данные из CSV-файлов'
 
     def handle(self, *args, **options):
-        for model, filename, fields in [
+        for model, filename in [
             (
                 Ingredient,
                 'data/ingredients.csv',
-                ['name', 'measurement_unit']
             ),
             (
                 Tag,
                 'data/tags.csv',
-                ['name', 'slug']
             ),
         ]:
-            with open(filename, 'r', encoding='utf-8') as csvfile:
-                reader = csv.DictReader(csvfile)
+            with open(filename, 'r', encoding='utf-8', newline='') as csvfile:
+                reader = csv.reader(csvfile)
                 for row in reader:
-                    data = {field: row[field] for field in fields}
+                    if model == Ingredient:
+                        data = {
+                            'name': row[0],
+                            'measurement_unit': row[1],
+                        }
+                    else:
+                        data = {
+                            'name': row[0],
+                            'slug': row[1],
+                        }
                     obj, created = model.objects.get_or_create(**data)
                     if created:
                         obj.save()
