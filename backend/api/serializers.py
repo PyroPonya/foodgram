@@ -142,8 +142,6 @@ class RecipeSerializer(serializers.ModelSerializer):
         source='amounts'
     )
     author = UserSerializer()
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
 
     class Meta:
         """Мета класс."""
@@ -160,30 +158,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             'image',
             'text',
             'cooking_time'
-        )
-
-    def get_is_favorited(self, recipe):
-        """Проверка избранного рецепта."""
-        request = self.context.get('request')
-        return (
-            request is not None
-            and request.user.is_authenticated
-            and Favorite.objects.filter(
-                user=request.user,
-                recipe=recipe
-            ).exists()
-        )
-
-    def get_is_in_shopping_cart(self, recipe):
-        """Проверка в корзине рецепта."""
-        request = self.context.get('request')
-        return (
-            request is not None
-            and request.user.is_authenticated
-            and ShoppingCart.objects.filter(
-                user=request.user,
-                recipe=recipe
-            ).exists()
         )
 
 
