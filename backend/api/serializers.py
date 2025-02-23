@@ -58,6 +58,15 @@ class UserSerializer(DjoserUserSerializer):
             ).exists()
         )
 
+    def validate(self, data):
+        """Validate avatar field."""
+        request = self.context.get('request')
+        if request and request.method == 'PUT' and 'avatar' not in request.data:
+            raise serializers.ValidationError(
+                {'avatar': 'Поле avatar обязательно'}
+            )
+        return data
+
 
 class IngredientSerializer(serializers.ModelSerializer):
     """Сериализатор продукта."""
@@ -85,11 +94,6 @@ class AmountIngredientSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.values_list('id', flat=True),
         required=True,
-        allow_null=False
-    )
-    amount = serializers.IntegerField(
-        required=True,
-        min_value=MIN_AMOUNT,
         allow_null=False
     )
 
@@ -267,8 +271,9 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         """Обновление рецепта."""
         tags_data = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
-        # с использованием .clear() - падал тест постмана
-        instance.amounts.all().delete()
+        # спасибо. действительно применял .clear() не к тому полю,
+        # запутался в именах указателей.
+        instance.ingredients.clear()
         self.create_amount_ingredients(instance, ingredients_data)
         instance.tags.set(tags_data)
         return super().update(instance, validated_data)

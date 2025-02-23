@@ -3,15 +3,17 @@ from django.db import models
 from django.contrib.auth.validators import UnicodeUsernameValidator
 from django.core import validators
 
-
 from .constants import (
+    MAX_AMOUNT,
     MAX_EMAIL_LENGTH,
+    MAX_MEASUREMENT_UNIT_LENGTH,
     MAX_NAME_LENGTH,
     MAX_RECIPE_NAME_LENGTH,
     MAX_SLUG_LENGTH,
     MAX_USERNAME_LENGTH,
     MIN_AMOUNT,
     MIN_COOKING_TIME,
+    MAX_COOKING_TIME
 )
 
 
@@ -50,7 +52,7 @@ class Ingredient(models.Model):
 
     name = models.CharField('Название', max_length=MAX_NAME_LENGTH)
     measurement_unit = models.CharField(
-        'Единица измерения', max_length=MAX_NAME_LENGTH
+        'Единица измерения', max_length=MAX_MEASUREMENT_UNIT_LENGTH
     )
 
     class Meta:
@@ -99,7 +101,10 @@ class Recipe(models.Model):
     text = models.TextField('Описание')
     cooking_time = models.PositiveSmallIntegerField(
         'Время приготовления',
-        validators=[validators.MinValueValidator(MIN_COOKING_TIME)]
+        validators=[
+            validators.MinValueValidator(MIN_COOKING_TIME),
+            validators.MaxValueValidator(MAX_COOKING_TIME)
+        ]
     )
     ingredients = models.ManyToManyField(
         Ingredient, through='AmountIngredient', related_name='recipes',
@@ -139,7 +144,11 @@ class AmountIngredient(models.Model):
         verbose_name='Продукт'
     )
     amount = models.PositiveSmallIntegerField(
-        'Количество', validators=[validators.MinValueValidator(MIN_AMOUNT)]
+        'Количество',
+        validators=[
+            validators.MinValueValidator(MIN_AMOUNT),
+            validators.MaxValueValidator(MAX_AMOUNT)
+        ]
     )
 
     class Meta:

@@ -56,11 +56,6 @@ class UserViewSet(DjoserUserViewSet):
     def avatar(self, request):
         """Аватар."""
         if request.method == 'PUT':
-            if 'avatar' not in request.data:
-                return Response(
-                    {'error': 'Поле avatar обязательно'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
             serializer = ImageSerializer(
                 request.user, data=request.data, partial=True
             )
@@ -103,7 +98,16 @@ class UserViewSet(DjoserUserViewSet):
                     {'errors': 'Вы не подписаны на этого автора'},
                     status=status.HTTP_400_BAD_REQUEST
                 )
-            get_object_or_404(Subscription, user=user, author=author).delete()
+            deleted_count, _ = get_object_or_404(
+                Subscription,
+                user=user,
+                author=author
+            ).delete()
+            if deleted_count == 0:
+                return Response(
+                    {'errors': 'Вы не подписаны на этого автора'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             return Response(
                 serializer.data,
                 status=status.HTTP_204_NO_CONTENT
@@ -160,26 +164,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
 class RecipeViewSet(viewsets.ModelViewSet):
     """Рецепты."""
 
-    queryset = Recipe.objects.annotate(
-        is_subscribed=Exists(
-            Subscription.objects.filter(
-                user=F('author'),
-                author=F('pk')
-            )
-        ),
-        is_favorited=Exists(
-            Subscription.objects.filter(
-                user=F('author'),
-                author=F('pk')
-            )
-        ),
-        is_in_shopping_cart=Exists(
-            Subscription.objects.filter(
-                user=F('author'),
-                author=F('pk')
-            )
-        )
-    )
     http_method_names = ('get', 'post', 'patch', 'delete')
     permission_classes = (
         IsAuthorOrReadOnly,
@@ -187,6 +171,29 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
+
+    def get_queryset(self):
+        """Кверисет рецептов."""
+        return Recipe.objects.annotate(
+            is_subscribed=Exists(
+                Subscription.objects.filter(
+                    user=self.request.user,
+                    author=F('pk')
+                )
+            ),
+            is_favorited=Exists(
+                Subscription.objects.filter(
+                    user=self.request.user,
+                    author=F('pk')
+                )
+            ),
+            is_in_shopping_cart=Exists(
+                Subscription.objects.filter(
+                    user=self.request.user,
+                    author=F('pk')
+                )
+            )
+        )
 
     def get_serializer_class(self):
         """Вобор сериализатора."""
@@ -248,13 +255,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
         collection = getattr(user, collection_name)
         if request.method == 'DELETE':
-            if not collection.filter(recipe=recipe).exists():
-                return Response(
-                    status=status.HTTP_400_BAD_REQUEST,
-                    data={
-                        'errors': 'Вы не добавили этот рецепт в коллекцию'
-                    }
-                )
             get_object_or_404(collection, recipe=recipe).delete()
             return Response(status=status.HTTP_204_NO_CONTENT)
         if collection.get_or_create(recipe=recipe)[1]:

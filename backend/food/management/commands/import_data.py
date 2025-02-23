@@ -26,20 +26,23 @@ class Command(BaseCommand):
         ]:
             with open(filename, 'r', encoding='utf-8', newline='') as csvfile:
                 reader = csv.reader(csvfile)
+                data = []
                 for row in reader:
                     if model == Ingredient:
-                        data = {
-                            'name': row[0],
-                            'measurement_unit': row[1],
-                        }
+                        data.append(
+                            model(
+                                name=row[0],
+                                measurement_unit=row[1],
+                            )
+                        )
                     else:
-                        data = {
-                            'name': row[0],
-                            'slug': row[1],
-                        }
-                    obj, created = model.objects.get_or_create(**data)
-                    if created:
-                        obj.save()
+                        data.append(
+                            model(
+                                name=row[0],
+                                slug=row[1],
+                            )
+                        )
+                model.objects.bulk_create(data, ignore_conflicts=True)
                 self.stdout.write(
                     self.style.SUCCESS(
                         f'{model.__name__} импортированы успешно'
