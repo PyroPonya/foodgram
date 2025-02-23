@@ -29,6 +29,14 @@ class ImageSerializer(serializers.ModelSerializer):
         model = User
         fields = ('avatar',)
 
+    def validate(self, data):
+        """Validate avatar field."""
+        if 'avatar' not in data:
+            raise serializers.ValidationError(
+                {'avatar': 'Обязательное поле'}
+            )
+        return data
+
 
 class UserSerializer(DjoserUserSerializer):
     """Сериализатор пользователя."""
@@ -57,15 +65,6 @@ class UserSerializer(DjoserUserSerializer):
                 author=author
             ).exists()
         )
-
-    def validate(self, data):
-        """Validate avatar field."""
-        request = self.context.get('request')
-        if request and request.method == 'PUT' and 'avatar' not in request.data:
-            raise serializers.ValidationError(
-                {'avatar': 'Поле avatar обязательно'}
-            )
-        return data
 
 
 class IngredientSerializer(serializers.ModelSerializer):
@@ -142,6 +141,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         source='amounts'
     )
     author = UserSerializer()
+    is_favorited = serializers.SerializerMethodField(read_only=True)
+    is_in_shopping_cart = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         """Мета класс."""
@@ -158,6 +159,30 @@ class RecipeSerializer(serializers.ModelSerializer):
             'image',
             'text',
             'cooking_time'
+        )
+
+    def get_is_favorited(self, recipe):
+        """Проверка нахождения рецепта в избранном."""
+        request = self.context.get('request')
+        return (
+            request is not None
+            and request.user.is_authenticated
+            and Favorite.objects.filter(
+                user=request.user,
+                recipe=recipe
+            ).exists()
+        )
+
+    def get_is_in_shopping_cart(self, recipe):
+        """Проверка нахождения рецепта в корзине."""
+        request = self.context.get('request')
+        return (
+            request is not None
+            and request.user.is_authenticated
+            and ShoppingCart.objects.filter(
+                user=request.user,
+                recipe=recipe
+            ).exists()
         )
 
 

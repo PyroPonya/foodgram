@@ -32,6 +32,8 @@ from food.models import (
     Recipe,
     Subscription,
     Tag,
+    ShoppingCart,
+    Favorite
 )
 
 
@@ -172,29 +174,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     filter_backends = (DjangoFilterBackend,)
     filterset_class = RecipeFilter
-
-    def get_queryset(self):
-        """Кверисет рецептов."""
-        return Recipe.objects.annotate(
-            is_subscribed=Exists(
-                Subscription.objects.filter(
-                    user=self.request.user,
-                    author=F('pk')
-                )
-            ),
-            is_favorited=Exists(
-                Subscription.objects.filter(
-                    user=self.request.user,
-                    author=F('pk')
-                )
-            ),
-            is_in_shopping_cart=Exists(
-                Subscription.objects.filter(
-                    user=self.request.user,
-                    author=F('pk')
-                )
-            )
-        )
 
     def get_serializer_class(self):
         """Вобор сериализатора."""
