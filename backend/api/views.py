@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db.models import Exists, F, Sum
+from django.db.models import F, Sum
 from django.http import FileResponse
 from django.shortcuts import get_object_or_404
 from django.urls import reverse
@@ -32,8 +32,6 @@ from food.models import (
     Recipe,
     Subscription,
     Tag,
-    ShoppingCart,
-    Favorite
 )
 
 
