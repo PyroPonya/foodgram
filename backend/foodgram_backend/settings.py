@@ -11,7 +11,7 @@ SECRET_KEY = os.getenv('SECRET_KEY', get_random_secret_key())
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 # DEBUG = True
 
-ALLOWED_HOSTS = [os.getenv('ALLOWED_HOSTS', '')]
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '').split(' ')
 
 
 # Application definition
@@ -149,6 +149,4 @@ REST_FRAMEWORK = {
 }
 
 
-CSRF_TRUSTED_ORIGINS = [
-    os.getenv('CSRF_TRUSTED_ORIGINS', '')
-]
+CSRF_TRUSTED_ORIGINS = os.getenv('CSRF_TRUSTED_ORIGINS', '').split(' ')
