@@ -80,24 +80,11 @@ class UserViewSet(DjoserUserViewSet):
         """Подписка."""
         user = request.user
         author = get_object_or_404(User, pk=id)
-        if user == author:
-            return Response(
-                {'errors': 'Нельзя подписаться на самого себя'},
-                status=status.HTTP_400_BAD_REQUEST
-            )
         serializer = SubscribeSerializer(
             author,
             context={'request': request}
         )
         if request.method == 'DELETE':
-            if not Subscription.objects.filter(
-                user=user,
-                author=author
-            ).exists():
-                return Response(
-                    {'errors': 'Вы не подписаны на этого автора'},
-                    status=status.HTTP_400_BAD_REQUEST
-                )
             deleted_count, _ = get_object_or_404(
                 Subscription,
                 user=user,
@@ -111,6 +98,11 @@ class UserViewSet(DjoserUserViewSet):
             return Response(
                 serializer.data,
                 status=status.HTTP_204_NO_CONTENT
+            )
+        if user == author:
+            return Response(
+                {'errors': 'Нельзя подписаться на самого себя'},
+                status=status.HTTP_400_BAD_REQUEST
             )
         if not Subscription.objects.get_or_create(
             user=user,
@@ -233,7 +225,15 @@ class RecipeViewSet(viewsets.ModelViewSet):
         recipe = get_object_or_404(Recipe, id=pk)
         collection = getattr(user, collection_name)
         if request.method == 'DELETE':
-            get_object_or_404(collection, recipe=recipe).delete()
+            deleted_count, _ = get_object_or_404(
+                collection,
+                recipe=recipe
+            ).delete()
+            if deleted_count == 0:
+                return Response(
+                    {'errors': 'Вы не добавили этот рецепт в коллекцию'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
             return Response(status=status.HTTP_204_NO_CONTENT)
         if collection.get_or_create(recipe=recipe)[1]:
             return Response(
