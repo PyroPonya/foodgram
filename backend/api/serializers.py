@@ -270,8 +270,6 @@ class RecipeCreateUpdateSerializer(serializers.ModelSerializer):
         """Обновление рецепта."""
         tags_data = validated_data.pop('tags')
         ingredients_data = validated_data.pop('ingredients')
-        # спасибо. действительно применял .clear() не к тому полю,
-        # запутался в именах указателей.
         instance.ingredients.clear()
         self.create_amount_ingredients(instance, ingredients_data)
         instance.tags.set(tags_data)

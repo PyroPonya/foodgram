@@ -188,9 +188,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
             }
         )
 
-    def perform_create(self, serializer):
-        """Создание рецепта."""
-        serializer.save(author=self.request.user)
+    # def perform_create(self, serializer):
+    #     """Создание рецепта."""
+    #     serializer.save(author=self.request.user)
 
     @action(
         ['GET'],
